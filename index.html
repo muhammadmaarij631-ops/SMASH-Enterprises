@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <script>
+      // Silence benign iframe/proxy WebSocket and HMR connection errors completely
+      (function() {
+        function isBenignError(msg) {
+          if (!msg) return false;
+          var lower = String(msg).toLowerCase();
+          return lower.indexOf('websocket') !== -1 || 
+                 lower.indexOf('ws://') !== -1 || 
+                 lower.indexOf('wss://') !== -1 ||
+                 lower.indexOf('[vite] failed') !== -1 ||
+                 lower.indexOf('web-socket') !== -1;
+        }
+
+        // Overwrite window.onerror
+        var oldOnError = window.onerror;
+        window.onerror = function(message, source, lineno, colno, error) {
+          var msg = message || '';
+          if (error && error.message) msg = error.message;
+          if (isBenignError(msg)) {
+            return true; // prevents firing default browser/platform handler
+          }
+          if (oldOnError) {
+            return oldOnError.apply(this, arguments);
+          }
+          return false;
+        };
+
+        // Event listener for uncaught errors in the capture phase (intercepts early)
+        window.addEventListener('error', function(event) {
+          var msg = event.message || (event.error && event.error.message) || '';
+          if (isBenignError(msg)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+
+        // Event listener for unhandled promise rejections in the capture phase
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event.reason;
+          var msg = '';
+          if (reason) {
+            msg = reason.message || reason.stack || String(reason);
+          }
+          if (isBenignError(msg)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+
+        // Overwrite console.error to silence the output in console/devtools/overlays
+        var originalConsoleError = console.error;
+        console.error = function() {
+          var args = Array.prototype.slice.call(arguments);
+          var firstArg = args[0];
+          if (firstArg && isBenignError(String(firstArg))) {
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+        
+        // Overwrite console.warn to silence the warning output as well
+        var originalConsoleWarn = console.warn;
+        console.warn = function() {
+          var args = Array.prototype.slice.call(arguments);
+          var firstArg = args[0];
+          if (firstArg && isBenignError(String(firstArg))) {
+            return;
+          }
+          originalConsoleWarn.apply(console, args);
+        };
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Title & Brand -->
+    <title>SMASH Enterprises | Full Stack Software & Web Engineering Agency</title>
+    <meta name="description" content="SMASH Enterprises is a premium software agency in Pakistan. We build high-performance full-stack web applications, stunning frontends, and robust backend storage APIs." />
+    <meta name="keywords" content="SMASH Enterprises, Software Agency Pakistan, Web Development Pakistan, Full Stack Developer, React Developer, Node JS, Express, MongoDB Atlas, Custom Web Apps" />
+    <meta name="author" content="SMASH Enterprises" />
+    
+    <!-- Open Graph (Facebook / LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SMASH Enterprises | Full Stack Web Systems" />
+    <meta property="og:description" content="Premium software and web development agency in Pakistan specializing in high-performance digital architectures." />
+    <meta property="og:url" content="https://smashenterprises.com" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&h=630&fit=crop" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SMASH Enterprises | Full Stack Web Systems" />
+    <meta name="twitter:description" content="High-performance web systems and full-stack software development based in Pakistan." />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&h=630&fit=crop" />
+
+    <!-- PWA / Mobile Theme Options -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#030303" />
+    
+    <!-- Favicon link -->
+    <link rel="icon" type="image/png" href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=32&h=32&fit=crop" />
+
+    <!-- Structured JSON-LD Data (SEO Rich Schema) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "SMASH Enterprises",
+        "description": "SMASH Enterprises is a high-performance web development and software engineering agency.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "Pakistan"
+        },
+        "url": "https://smashenterprises.com",
+        "logo": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=200&fit=crop",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "smashenterprises185@gmail.com",
+          "contactType": "customer service"
+        },
+        "priceRange": "$$$"
+      }
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>
